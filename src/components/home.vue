@@ -7,7 +7,7 @@
       <el-button @click="signOut()">退出</el-button>
     </el-header>
     <el-container>
-      <el-aside :width="isCollapse ? '64px' : '200px' ">
+      <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="toggleCollapse">|||</div>
         <el-menu
           background-color="#333744"
@@ -16,6 +16,8 @@
           :unique-opened="true"
           :collapse="isCollapse"
           :collapse-transition="false"
+          :router="true"
+          :default-active="activePath"
         >
           <el-submenu
             :index="item.id + ''"
@@ -27,9 +29,10 @@
               <span>{{ item.authName }}</span>
             </template>
             <el-menu-item
-              :index="SubItem.id + ''"
+              :index="SubItem.path"
               v-for="SubItem in item.children"
               :key="SubItem.id"
+              @click="saveNavState(SubItem.path)"
             >
               <template slot="title">
                 <i class="el-icon-menu"></i>
@@ -39,7 +42,9 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main>
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -56,11 +61,14 @@ export default {
         102: 'el-icon-s-order',
         145: 'el-icon-s-marketing'
       },
-      isCollapse: false
+      isCollapse: false,
+      // 被激活的链接地址
+      activePath: ''
     }
   },
   created() {
     this.getMenuList()
+    this.activePath = window.sessionStorage.getItem('activePath')
   },
   methods: {
     signOut() {
@@ -76,6 +84,11 @@ export default {
     // 折叠菜单
     toggleCollapse() {
       this.isCollapse = !this.isCollapse
+    },
+    // 保存链接的激活状态
+    saveNavState(activePath) {
+      window.sessionStorage.setItem('activePath', activePath)
+      this.activePath = activePath
     }
   }
 }
@@ -103,14 +116,11 @@ export default {
   }
 }
 .el-aside {
-  transition: .3s;
+  transition: 0.3s;
   background: #333744;
   .el-menu {
     border-right: none;
   }
-}
-.el-main {
-  background: #787b88;
 }
 .toggle-button {
   background-color: #4a5064;
